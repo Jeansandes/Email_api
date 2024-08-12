@@ -4,9 +4,7 @@ import com.sandesDev.apiConsumer.records.ClientDto;
 import com.sandesDev.apiConsumer.repositories.EmailRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
@@ -17,15 +15,21 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.openMocks;
 
 class EmailServicesTest {
+    private static final String NAME = "jean";
+    private static final String EMAIL = "sandesjean.sandes@gmail.com";
+    private static final String PASSWORD = "123";
     @InjectMocks
     private EmailServices emailServices;
     @Mock
     private EmailRepository emailRepository;
     @Mock
     private JavaMailSender mailSender;
+    @Mock
     private SimpleMailMessage mailMessage = new SimpleMailMessage();;
     String sender = "sandesjean.sandes@gmail.com";
     ClientDto dto;
+    @Captor
+    private ArgumentCaptor<SimpleMailMessage> messageCaptor;
 
     @BeforeEach
     void setUp() {
@@ -34,22 +38,40 @@ class EmailServicesTest {
     }
 
     private void startContent() {
-        dto = new ClientDto("Jean","sandesjean.sandes@gmail.com","123");
+        dto = new ClientDto(NAME,EMAIL,PASSWORD);
     }
 
     @Test
     void whenSendMessageThenReturnEmailMessage() {
-        doNothing().when(mailSender).send(any());
-        emailServices.sendMessage("jean@gmail.com","text","teeext");
-        verify(mailSender, times(1)).send(mailMessage);
-        verify(emailServices,times(1)).save(argThat(dto -> dto.username().equals("Jean")));
-        verify(emailServices,times(1)).save(argThat(dto -> dto.email().contains("sandesjean.sandes@gmail.com")));
-        verify(emailServices,times(1)).save(argThat(dto -> dto.password().equals("123")));
+        // Arrange
+        String sender = "sandesjean.sandes@gmail.com";
+        String recipient = "recipient@example.com";
+        String subject = "Test Subject";
+        String message = "Test Message";
+
+        // Mock the SimpleMailMessage
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setFrom(sender);
+        mailMessage.setTo(recipient);
+        mailMessage.setSubject(subject);
+        mailMessage.setText(message);
+
+        // Act
+        emailServices.sendMessage(recipient, subject, message);
+        // Assert
+        verify(mailSender, times(1)).send(messageCaptor.capture());
+        SimpleMailMessage capturedMessage = messageCaptor.getValue();
+
+        // Verify the captured SimpleMailMessage content
+        assertEquals(recipient, capturedMessage.getTo()[0]); // Para um único destinatário
+        assertEquals(subject, capturedMessage.getSubject());
+        assertEquals(message, capturedMessage.getText());
 
     }
 
     @Test
     void save() {
+
     }
 
     @Test
