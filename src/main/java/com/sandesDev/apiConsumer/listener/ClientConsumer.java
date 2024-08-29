@@ -29,10 +29,10 @@ public class ClientConsumer {
         logger.info("Received Message Consumer 01: " + dto.username());
         emailServices.save(dto);
     }
-    //@KafkaListener(topicPartitions = @TopicPartition(topic = "tweet_email_kafka", partitions = { "2" }), containerFactory = "kafkaListenerContainerFactory")
-   // public void deleteListener(ClientDto dto) {
-     //   logger.info("Received Message Consumer 02: " + dto.username());
-       // emailServices.delete(dto);
-   // }
+    @KafkaListener(topicPartitions = @TopicPartition(topic = "tweet_email_kafka", partitions = { "0" }), containerFactory = "kafkaListenerContainerFactory")
+    public void deleteListener(ClientDto dto) {
+        logger.info("Received Message Consumer 02: " + dto.username());
+        emailServices.delete(dto);
+    }
 
 }
